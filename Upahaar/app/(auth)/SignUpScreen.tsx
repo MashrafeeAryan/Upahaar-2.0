@@ -9,11 +9,12 @@ import {
 import React, { useState } from "react";
 import InputField from "@/src/components/ui/InputField";
 import AppButton from "@/src/components/ui/AppButton";
+import { router } from "expo-router";
 
 const SignUpScreen = () => {
   // States used for inputs
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState();
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSignUp = () => {
@@ -21,7 +22,7 @@ const SignUpScreen = () => {
   };
 
   return (
-    // Adjusts screen when the on-screen keybaord appears, so inputs don't get convered
+    // Prevents keyboard from covering form fields on iOS
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       className="flex-1 bg-white"
@@ -74,7 +75,7 @@ const SignUpScreen = () => {
         {/*Secondary Action*/}
         {/*Presses the the sign router.replace buttong*/}
         <Pressable
-          onPress={() => router.replacce("/SignInScreen")}
+          onPress={() => router.replace("/SignInScreen")}
           className="mt-6"
         >
           <Text className="text-center text-gray-500">
