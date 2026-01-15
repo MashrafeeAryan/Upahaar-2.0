@@ -1,6 +1,14 @@
-import { View, Text, Platform, KeyboardAvoidingView, Image } from "react-native";
+import {
+  View,
+  Text,
+  Platform,
+  KeyboardAvoidingView,
+  Image,
+  Pressable,
+} from "react-native";
 import React, { useState } from "react";
 import InputField from "@/src/components/ui/InputField";
+import AppButton from "@/src/components/ui/AppButton";
 
 const SignUpScreen = () => {
   // States used for inputs
@@ -18,7 +26,6 @@ const SignUpScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       className="flex-1 bg-white"
     >
-  >
       <View className="flex-1 px-6 justify-center">
         {/* Logo */}
         <Image
@@ -57,6 +64,24 @@ const SignUpScreen = () => {
             onChangeText={setConfirmPassword}
           />
         </View>
+
+        {/* CTA */}
+        {/* SignUp BUtton*/}
+        <View className="mt-6">
+          <AppButton title="Create account" onPress={handleSignUp} />
+        </View>
+
+        {/*Secondary Action*/}
+        {/*Presses the the sign router.replace buttong*/}
+        <Pressable
+          onPress={() => router.replacce("/SignInScreen")}
+          className="mt-6"
+        >
+          <Text className="text-center text-gray-500">
+            Already have an account?{" "}
+            <Text className="text-primary font-semibold">Sign in</Text>
+          </Text>
+        </Pressable>
       </View>
     </KeyboardAvoidingView>
   );

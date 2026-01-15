@@ -7,6 +7,7 @@ export default function AppButton({
   loading = false,
 }) {
   return (
+    //Using pressable because it's more easy to use than touchableopacity
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
