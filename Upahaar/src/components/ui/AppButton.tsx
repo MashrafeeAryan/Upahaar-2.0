@@ -12,7 +12,7 @@ export default function AppButton({
       onPress={onPress}
       disabled={disabled || loading}
       className={`rounded-lg py-4 items-center ${
-        disabled || loading ? "bg-gray-300" : "bg-primary"
+        disabled || loading ? "bg-pink-200" : "bg-primary"
       }`}
     >
       {loading ? (

@@ -6,7 +6,8 @@ export default function InputField(props) {
     return (
         <TextInput
         {...props}
-        className="border border-gray-300 rounded-lg px-4 py-3 text-base mb-4 text-gray-900"
+        className="border border-primary rounded-lg px-4 py-3 text-base mb-4 text-gray-900 bg-white"
+        underlineColorAndroid="transparent"
         placeholderTextColor="#9CA3AF"
         />
     )

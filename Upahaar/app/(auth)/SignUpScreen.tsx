@@ -29,20 +29,21 @@ const SignUpScreen = () => {
     >
       <View className="flex-1 px-6 justify-center">
         {/* Logo */}
-        <Image
+        {/* <Image
           source={require("../../assets/logo.png")}
           className="w-24 h-24 self-center mb-8"
           resizeMode="contain"
-        />
+        /> */}
 
         {/* Heading */}
-        <Text className="text-3xl font-bold text-gray-900 text-center">
+        <Text className="text-3xl font-bold text-textPrimary text-center">
           Create account
         </Text>
 
-        <Text className="text-base text-gray-500 text-center mt-2 mb-8">
+        <Text className="text-base text-textSecondary text-center mt-2 mb-8">
           Track birthdays and send meaningful gifts effortlessly
         </Text>
+
         {/*Form*/}
         <View className="space-y-4">
           <InputField
@@ -78,7 +79,7 @@ const SignUpScreen = () => {
           onPress={() => router.replace("/SignInScreen")}
           className="mt-6"
         >
-          <Text className="text-center text-gray-500">
+          <Text className="text-center text-textSecondary">
             Already have an account?{" "}
             <Text className="text-primary font-semibold">Sign in</Text>
           </Text>
