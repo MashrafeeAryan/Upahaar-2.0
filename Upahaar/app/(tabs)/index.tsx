@@ -9,6 +9,7 @@ const Index = () => {
           Go to Sign Up
         </Text>
       </Link>
+      
     </View>
   );
 };

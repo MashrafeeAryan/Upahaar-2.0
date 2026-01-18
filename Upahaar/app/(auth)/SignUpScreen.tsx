@@ -3,10 +3,10 @@ import {
   Text,
   Platform,
   KeyboardAvoidingView,
-  Image,
+  ImageBackground,
   Pressable,
 } from "react-native";
-import React, { useState } from "react";
+import { useState } from "react";
 import InputField from "@/src/components/ui/InputField";
 import AppButton from "@/src/components/ui/AppButton";
 import { router } from "expo-router";
@@ -18,34 +18,32 @@ const SignUpScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSignUp = () => {
-    //API Later
+    // API later
   };
 
   return (
-    // Prevents keyboard from covering form fields on iOS
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      className="flex-1 bg-white"
+      className="flex-1"
     >
-      <View className="flex-1 px-6 justify-center">
-        {/* Logo */}
-        {/* <Image
-          source={require("../../assets/logo.png")}
-          className="w-24 h-24 self-center mb-8"
-          resizeMode="contain"
-        /> */}
+      {/* Background */}
+      <ImageBackground
+        source={require("../../assets/images/2.webp")}
+        resizeMode="cover"
+        className="flex-1 justify-center px-6"
+      >
+        {/* Card */}
+        <View className="bg-white rounded-2xl px-6 py-8 shadow-lg">
+          {/* Heading */}
+          <Text className="text-2xl font-bold text-secondary text-center">
+            Create account!
+          </Text>
 
-        {/* Heading */}
-        <Text className="text-3xl font-bold text-textPrimary text-center">
-          Create account
-        </Text>
+          <Text className="text-base text-textSecondary text-center mt-2 mb-6">
+            Track birthdays and send meaningful gifts
+          </Text>
 
-        <Text className="text-base text-textSecondary text-center mt-2 mb-8">
-          Track birthdays and send meaningful gifts effortlessly
-        </Text>
-
-        {/*Form*/}
-        <View className="space-y-4">
+          {/* Form */}
           <InputField
             placeholder="Email address"
             autoCapitalize="none"
@@ -53,38 +51,36 @@ const SignUpScreen = () => {
             value={email}
             onChangeText={setEmail}
           />
+
           <InputField
             placeholder="Password"
             secureTextEntry
             value={password}
             onChangeText={setPassword}
           />
+
           <InputField
             placeholder="Confirm password"
             secureTextEntry
             value={confirmPassword}
             onChangeText={setConfirmPassword}
           />
-        </View>
 
-        {/* CTA */}
-        {/* SignUp BUtton*/}
-        <View className="mt-6">
+          {/* CTA */}
           <AppButton title="Create account" onPress={handleSignUp} />
-        </View>
 
-        {/*Secondary Action*/}
-        {/*Presses the the sign router.replace buttong*/}
-        <Pressable
-          onPress={() => router.replace("/SignInScreen")}
-          className="mt-6"
-        >
-          <Text className="text-center text-textSecondary">
-            Already have an account?{" "}
-            <Text className="text-primary font-semibold">Sign in</Text>
-          </Text>
-        </Pressable>
-      </View>
+          {/* Secondary action */}
+          <Pressable
+            onPress={() => router.replace("/(auth)/SignInScreen")}
+            className="mt-6"
+          >
+            <Text className="text-center text-textSecondary">
+              Already have an account?{" "}
+              <Text className="text-primary font-semibold">Sign in</Text>
+            </Text>
+          </Pressable>
+        </View>
+      </ImageBackground>
     </KeyboardAvoidingView>
   );
 };

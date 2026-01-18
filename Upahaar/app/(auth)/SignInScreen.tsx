@@ -3,7 +3,7 @@ import {
   Text,
   Platform,
   KeyboardAvoidingView,
-  Image,
+  ImageBackground,
   Pressable,
 } from "react-native";
 import { useState } from "react";
@@ -12,39 +12,31 @@ import AppButton from "@/src/components/ui/AppButton";
 import { router } from "expo-router";
 
 const SignInScreen = () => {
-  // States used for inputs
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSignIn = () => {
-    // API later
-  };
-
   return (
-    // Prevents keyboard from covering form fields on iOS
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       className="flex-1"
     >
-      <View className="flex-1 px-6 justify-center bg-background"> 
-        {/* Logo */}
-        {/* <Image
-          source={require("../../assets/logo.png")}
-          className="w-24 h-24 self-center mb-8"
-          resizeMode="contain"
-        /> */}
+      {/* Background */}
+      <ImageBackground
+        source={require("../../assets/images/2.webp")}
+        resizeMode="cover"
+        className="flex-1 justify-center px-6"
+      >
+        {/* Card */}
+        <View className="bg-white rounded-2xl px-6 py-8 shadow-lg">
+          {/* Heading*/}
+          <Text className="text-2xl font-bold text-secondary text-center">
+            Welcome back!
+          </Text>
 
-        {/* Heading */}
-        <Text className="text-3xl font-bold text-textPrimary text-center">
-          Welcome back
-        </Text>
+          <Text className="text-base text-textSecondary text-center mt-2 mb-6">
+            Sign in to continue
+          </Text>
 
-        <Text className="text-base text-textSecondary text-center mt-2 mb-8">
-          Sign in to continue tracking birthdays and gifts
-        </Text>
-
-        {/* Form */}
-        <View className="space-y-2">
           <InputField
             placeholder="Email address"
             autoCapitalize="none"
@@ -59,24 +51,20 @@ const SignInScreen = () => {
             value={password}
             onChangeText={setPassword}
           />
-        </View>
 
-        {/* CTA */}
-        <View className="mt-6">
-          <AppButton title="Sign in" onPress={handleSignIn} />
-        </View>
+          <AppButton title="Sign in" onPress={() => {}} />
 
-        {/* Secondary action */}
-        <Pressable
-          onPress={() => router.replace("/(auth)/SignUpScreen")}
-          className="mt-6"
-        >
-          <Text className="text-center text-textSecondary">
-            Don’t have an account?{" "}
-            <Text className="text-primary font-semibold">Create one</Text>
-          </Text>
-        </Pressable>
-      </View>
+          <Pressable
+            onPress={() => router.replace("/(auth)/SignUpScreen")}
+            className="mt-6"
+          >
+            <Text className="text-center text-textSecondary">
+              Don’t have an account?{" "}
+              <Text className="text-primary font-semibold">Create one</Text>
+            </Text>
+          </Pressable>
+        </View>
+      </ImageBackground>
     </KeyboardAvoidingView>
   );
 };

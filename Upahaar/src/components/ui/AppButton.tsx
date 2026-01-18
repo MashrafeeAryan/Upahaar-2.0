@@ -11,8 +11,8 @@ export default function AppButton({
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
-      className={`rounded-lg py-4 items-center ${
-        disabled || loading ? "bg-pink-200" : "bg-primary"
+      className={`rounded-2xl py-3 items-center ${
+        disabled || loading ? "bg-pink-200" : "bg-pink-300"
       }`}
     >
       {loading ? (
