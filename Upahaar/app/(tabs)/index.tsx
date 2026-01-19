@@ -4,7 +4,7 @@ import { router } from "expo-router";
 const Index = () => {
   return (
     <ImageBackground
-      source={require("../../assets/images/backgroundImage.png")}
+      source={require("../../assets/images/appBackground2.jpg")}
       resizeMode="cover"
       className="flex-1"
     >
@@ -30,23 +30,21 @@ const Index = () => {
             </View>
 
             <Text className="text-xl font-bold text-textPrimary">
-              Sarah Ahmed
+              Bhiduuuuuuuuuuuu
             </Text>
             <Text className="text-base text-textSecondary mt-1">
               In 3 days
             </Text>
 
-            <Pressable
-              onPress={() => {
-                // Later: navigate to gift ordering flow
-                // router.push("/gifts");
-              }}
-              className="mt-5 bg-primary rounded-xl py-3 items-center"
-            >
-              <Text className="text-white font-semibold text-base">
-                Order Gift
-              </Text>
-            </Pressable>
+      <AppButton
+  title="Order Gift"
+  onPress={() => {
+    // Later: navigate to gift ordering flow
+    // router.push("/gifts");
+  }}
+  className="mt-5"
+/>
+
           </View>
 
           {/* Upcoming Birthdays */}
