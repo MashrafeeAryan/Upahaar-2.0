@@ -1,65 +1,102 @@
 import { Tabs } from "expo-router";
-import React from "react";
+import { Ionicons } from "@expo/vector-icons";
 
-import { HapticTab } from "@/components/haptic-tab";
-import { IconSymbol } from "@/src/components/ui/icon-symbol";
-export default function TabLayout() {
+/**
+ * Shared Upahaar theme colors.
+ *
+ * The tab bar uses a soft, light-pink style to match the app's
+ * cute/girly visual direction while keeping navigation readable.
+ */
+const PRIMARY_PINK = "#D81B60";
+const SOFT_PINK = "#FFF5F8";
+const BORDER_PINK = "#F8BBD0";
+const MUTED_TEXT = "#9B6B7C";
+
+/**
+ * Bottom tab layout for the main authenticated area of Upahaar.
+ *
+ * Tabs:
+ * - Home: dashboard with birthdays and recent memories
+ * - Friends: saved people and birthday profiles
+ * - Memory: quick note capture / Memory Drop
+ * - Gifts: gift recommendations from saved memories
+ * - Settings: account, privacy, and app settings
+ */
+const TabsLayout = () => {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarButton: HapticTab,
+
+        tabBarActiveTintColor: PRIMARY_PINK,
+        tabBarInactiveTintColor: MUTED_TEXT,
+
         tabBarStyle: {
-          backgroundColor: "transparent",
-          position: "absolute",
-          borderTopWidth: 0,
-          elevation: 0, // Android shadow
+          backgroundColor: SOFT_PINK,
+          borderTopColor: BORDER_PINK,
+          borderTopWidth: 1,
+          height: 76,
+          paddingBottom: 12,
+          paddingTop: 8,
+        },
+
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "700",
         },
       }}
     >
-      {/* Home */}
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={26} name="house.fill" color={color} />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
           ),
         }}
       />
 
-      {/* Birthdays */}
       <Tabs.Screen
-        name="BirthdayScreen"
+        name="friends"
         options={{
-          title: "Birthdays",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={26} name="gift.fill" color={color} />
+          title: "Friends",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people" size={size} color={color} />
           ),
         }}
       />
 
-      {/* Gifts */}
       <Tabs.Screen
-        name="GiftsScreen"
+        name="memory"
+        options={{
+          title: "Memory",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="heart" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="gifts"
         options={{
           title: "Gifts",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={26} name="bag.fill" color={color} />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="gift" size={size} color={color} />
           ),
         }}
       />
 
-      {/* Profile */}
       <Tabs.Screen
-        name="ProfileScreen"
+        name="settings"
         options={{
-          title: "Profile",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={26} name="person.fill" color={color} />
+          title: "Settings",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings" size={size} color={color} />
           ),
         }}
       />
     </Tabs>
   );
-}
+};
+
+export default TabsLayout;
