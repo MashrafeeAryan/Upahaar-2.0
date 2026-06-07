@@ -59,7 +59,7 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="friends"
         options={{
-          title: "Friends",
+          title: "Friend",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people" size={size} color={color} />
           ),

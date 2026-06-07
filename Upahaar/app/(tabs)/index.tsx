@@ -1,11 +1,14 @@
-import { View, Text, Pressable, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  ImageBackground,
+  Pressable,
+  ScrollView,
+  Image,
+} from "react-native";
 import { router } from "expo-router";
 import AppButton from "@/src/components/ui/AppButton";
 
-/**
- * Soft Upahaar theme.
- * Calmer than using a full image background on every screen.
- */
 const CARD_BORDER_COLOR = "#F8BBD0";
 const CARD_BORDER_WIDTH = 1;
 
@@ -87,78 +90,215 @@ const Index = () => {
   const previewBirthdays = upcomingBirthdays.slice(1, 3);
 
   return (
-    <View className="flex-1" style={{ backgroundColor: VERY_SOFT_PINK }}>
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 120 }}
-        className="flex-1 px-6 pt-14"
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
-        <View className="mb-6">
-          <Text className="text-3xl font-bold text-textPrimary">
-            Upahaar
-          </Text>
+    <ImageBackground
+      source={require("../../assets/images/appBackground2_new.png")}
+      resizeMode="cover"
+      className="flex-1"
+    >
+      <View className="flex-1 bg-pink-50/60">
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 140 }}
+          className="flex-1 px-6 pt-14"
+          showsVerticalScrollIndicator={false}
+        >
+    
+          {/* Next birthday */}
+          {nextBirthday && (
+            <View
+              className="bg-white/95 rounded-3xl p-5 shadow-sm border mb-5"
+              style={{
+                borderColor: CARD_BORDER_COLOR,
+                borderWidth: CARD_BORDER_WIDTH,
+              }}
+            >
+              <View className="flex-row items-center justify-between mb-4">
+                <Text
+                  className="text-sm font-bold"
+                  style={{ color: PRIMARY_PINK }}
+                >
+                  Next birthday
+                </Text>
 
-          <Text className="text-base text-textSecondary mt-2 leading-5">
-            Remember little things. Give better gifts.
-          </Text>
-        </View>
+                <View
+                  className="px-3 py-1 rounded-full"
+                  style={{ backgroundColor: SOFT_PINK }}
+                >
+                  <Text
+                    className="text-xs font-bold"
+                    style={{ color: PRIMARY_PINK }}
+                  >
+                    {getDaysUntilBirthday(nextBirthday.birthDate)} days
+                  </Text>
+                </View>
+              </View>
 
-        {/* Main birthday card */}
-        {nextBirthday && (
+              <Text className="text-2xl font-bold text-textPrimary">
+                {nextBirthday.name}
+              </Text>
+
+              <Text className="text-base text-textSecondary mt-1">
+                {formatDate(nextBirthday.birthDate)}
+              </Text>
+
+              <View className="mt-7">
+                <AppButton
+                  title="Find Gift Ideas"
+                  onPress={() => {
+                    router.push("/(tabs)/gifts");
+                  }}
+                />
+              </View>
+            </View>
+          )}
+
+          {/* Quick actions */}
+          <View className="flex-row gap-3 mb-6">
+            <Pressable
+              onPress={() => {
+                router.push("/(tabs)/memory");
+              }}
+              className="flex-1 rounded-3xl p-4 border"
+              style={{
+                backgroundColor: SOFT_PINK,
+                borderColor: CARD_BORDER_COLOR,
+                borderWidth: CARD_BORDER_WIDTH,
+              }}
+            >
+              <Text className="text-base font-bold text-textPrimary">
+                Memory Drop
+              </Text>
+
+              <Text className="text-sm text-textSecondary mt-1 leading-5">
+                Save a quick note
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => {
+                router.push("/friend/add");
+              }}
+              className="flex-1 bg-white/95 rounded-3xl p-4 border"
+              style={{
+                borderColor: CARD_BORDER_COLOR,
+                borderWidth: CARD_BORDER_WIDTH,
+              }}
+            >
+              <Text className="text-base font-bold text-textPrimary">
+                Add Friend
+              </Text>
+
+              <Text className="text-sm text-textSecondary mt-1 leading-5">
+                Save a birthday
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* Recent memories */}
           <View
-            className="bg-white rounded-3xl p-5 shadow-sm border mb-5"
+            className="bg-white/95 rounded-3xl p-5 shadow-sm border mb-6"
             style={{
               borderColor: CARD_BORDER_COLOR,
               borderWidth: CARD_BORDER_WIDTH,
             }}
           >
-            <View className="flex-row items-center justify-between mb-4">
-              <Text
-                className="text-sm font-bold"
-                style={{ color: PRIMARY_PINK }}
-              >
-                Next birthday
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-lg font-bold text-textPrimary">
+                Recent memories
               </Text>
 
-              <View
-                className="px-3 py-1 rounded-full"
-                style={{ backgroundColor: SOFT_PINK }}
+              <Pressable
+                onPress={() => {
+                  router.push("/(tabs)/memory");
+                }}
               >
                 <Text
-                  className="text-xs font-bold"
+                  className="font-semibold"
                   style={{ color: PRIMARY_PINK }}
                 >
-                  {getDaysUntilBirthday(nextBirthday.birthDate)} days
+                  Add
                 </Text>
-              </View>
+              </Pressable>
             </View>
 
-            <Text className="text-2xl font-bold text-textPrimary">
-              {nextBirthday.name}
-            </Text>
+            <View className="gap-3">
+              {recentMemories.map((memory) => (
+                <View
+                  key={memory.id}
+                  className="rounded-2xl px-4 py-3"
+                  style={{ backgroundColor: VERY_SOFT_PINK }}
+                >
+                  <Text className="text-sm font-bold text-textPrimary">
+                    {memory.name}
+                  </Text>
 
-            <Text className="text-base text-textSecondary mt-1">
-              {formatDate(nextBirthday.birthDate)}
-            </Text>
-
-            <AppButton
-              title="Find Gift Ideas"
-              onPress={() => {
-                router.push("/(tabs)/gifts");
-              }}
-              className="mt-5"
-            />
+                  <Text className="text-sm text-textSecondary mt-1">
+                    {memory.note}
+                  </Text>
+                </View>
+              ))}
+            </View>
           </View>
-        )}
 
-        {/* Quick actions */}
-        <View className="flex-row gap-3 mb-6">
+          {/* Upcoming birthdays */}
+          <View className="flex-row items-center justify-between mb-3">
+            <Text className="text-lg font-bold text-textPrimary">
+              Coming up
+            </Text>
+
+            <Pressable
+              onPress={() => {
+                router.push("/(tabs)/friends");
+              }}
+            >
+              <Text className="font-semibold" style={{ color: PRIMARY_PINK }}>
+                View all
+              </Text>
+            </Pressable>
+          </View>
+
+          <View
+            className="bg-white/95 rounded-3xl shadow-sm overflow-hidden border"
+            style={{
+              borderColor: CARD_BORDER_COLOR,
+              borderWidth: CARD_BORDER_WIDTH,
+            }}
+          >
+            {previewBirthdays.map((person, index) => (
+              <View
+                key={person.id}
+                className={`flex-row items-center justify-between px-5 py-4 ${
+                  index !== previewBirthdays.length - 1 ? "border-b" : ""
+                }`}
+                style={{
+                  borderBottomColor:
+                    index !== previewBirthdays.length - 1
+                      ? CARD_BORDER_COLOR
+                      : "transparent",
+                }}
+              >
+                <View>
+                  <Text className="text-base font-semibold text-textPrimary">
+                    {person.name}
+                  </Text>
+
+                  <Text className="text-xs text-textSecondary mt-1">
+                    {getDaysUntilBirthday(person.birthDate)} days left
+                  </Text>
+                </View>
+
+                <Text className="text-sm font-semibold text-textSecondary">
+                  {formatDate(person.birthDate)}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Widget preview */}
           <Pressable
             onPress={() => {
-              router.push("/(tabs)/memory");
+              router.push("/widget-preview");
             }}
-            className="flex-1 rounded-3xl p-4 border"
+            className="mt-6 rounded-3xl px-5 py-4 border"
             style={{
               backgroundColor: SOFT_PINK,
               borderColor: CARD_BORDER_COLOR,
@@ -166,153 +306,52 @@ const Index = () => {
             }}
           >
             <Text className="text-base font-bold text-textPrimary">
-              Memory Drop
+              Try quick capture
             </Text>
 
-            <Text className="text-sm text-textSecondary mt-1 leading-5">
-              Save a quick note
+            <Text className="text-sm text-textSecondary mt-1">
+              Preview the Memory Drop widget idea.
             </Text>
           </Pressable>
+        </ScrollView>
 
-          <Pressable
-            onPress={() => {
-              router.push("/friend/add");
-            }}
-            className="flex-1 bg-white rounded-3xl p-4 border"
+        {/* Floating Mimi assistant */}
+        <Pressable
+          onPress={() => {
+            router.push("/mimi-assistant");
+          }}
+          className="absolute right-5 bottom-24 items-center"
+        >
+          <View
+            className="mb-2 rounded-full px-3 py-1 border shadow-sm"
             style={{
+              backgroundColor: "#FFFFFF",
               borderColor: CARD_BORDER_COLOR,
               borderWidth: CARD_BORDER_WIDTH,
             }}
           >
-            <Text className="text-base font-bold text-textPrimary">
-              Add Friend
+            <Text className="text-xs font-bold" style={{ color: PRIMARY_PINK }}>
+              Ask Mimi
             </Text>
-
-            <Text className="text-sm text-textSecondary mt-1 leading-5">
-              Save a birthday
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* Recent memory */}
-        <View
-          className="bg-white rounded-3xl p-5 shadow-sm border mb-6"
-          style={{
-            borderColor: CARD_BORDER_COLOR,
-            borderWidth: CARD_BORDER_WIDTH,
-          }}
-        >
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-lg font-bold text-textPrimary">
-              Recent memories
-            </Text>
-
-            <Pressable
-              onPress={() => {
-                router.push("/(tabs)/memory");
-              }}
-            >
-              <Text className="font-semibold" style={{ color: PRIMARY_PINK }}>
-                Add
-              </Text>
-            </Pressable>
           </View>
 
-          <View className="gap-3">
-            {recentMemories.map((memory) => (
-              <View
-                key={memory.id}
-                className="rounded-2xl px-4 py-3"
-                style={{ backgroundColor: VERY_SOFT_PINK }}
-              >
-                <Text className="text-sm font-bold text-textPrimary">
-                  {memory.name}
-                </Text>
-
-                <Text className="text-sm text-textSecondary mt-1">
-                  {memory.note}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Upcoming birthdays */}
-        <View className="flex-row items-center justify-between mb-3">
-          <Text className="text-lg font-bold text-textPrimary">
-            Coming up
-          </Text>
-
-          <Pressable
-            onPress={() => {
-              router.push("/(tabs)/friends");
+          <View
+            className="h-16 w-16 rounded-full items-center justify-center shadow-lg border overflow-hidden"
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderColor: CARD_BORDER_COLOR,
+              borderWidth: CARD_BORDER_WIDTH,
             }}
           >
-            <Text className="font-semibold" style={{ color: PRIMARY_PINK }}>
-              View all
-            </Text>
-          </Pressable>
-        </View>
-
-        <View
-          className="bg-white rounded-3xl shadow-sm overflow-hidden border"
-          style={{
-            borderColor: CARD_BORDER_COLOR,
-            borderWidth: CARD_BORDER_WIDTH,
-          }}
-        >
-          {previewBirthdays.map((person, index) => (
-            <View
-              key={person.id}
-              className={`flex-row items-center justify-between px-5 py-4 ${
-                index !== previewBirthdays.length - 1 ? "border-b" : ""
-              }`}
-              style={{
-                borderBottomColor:
-                  index !== previewBirthdays.length - 1
-                    ? CARD_BORDER_COLOR
-                    : "transparent",
-              }}
-            >
-              <View>
-                <Text className="text-base font-semibold text-textPrimary">
-                  {person.name}
-                </Text>
-
-                <Text className="text-xs text-textSecondary mt-1">
-                  {getDaysUntilBirthday(person.birthDate)} days left
-                </Text>
-              </View>
-
-              <Text className="text-sm font-semibold text-textSecondary">
-                {formatDate(person.birthDate)}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Widget preview */}
-        <Pressable
-          onPress={() => {
-            router.push("/widget-preview");
-          }}
-          className="mt-6 rounded-3xl px-5 py-4 border"
-          style={{
-            backgroundColor: SOFT_PINK,
-            borderColor: CARD_BORDER_COLOR,
-            borderWidth: CARD_BORDER_WIDTH,
-          }}
-        >
-          <Text className="text-base font-bold text-textPrimary">
-            Try quick capture
-          </Text>
-
-          <Text className="text-sm text-textSecondary mt-1">
-            Preview the Memory Drop widget idea.
-          </Text>
+            <Image
+              source={require("../../assets/images/mimi.png")}
+              className="h-16 w-16"
+              resizeMode="cover"
+            />
+          </View>
         </Pressable>
-      </ScrollView>
-    </View>
+      </View>
+    </ImageBackground>
   );
 };
 
