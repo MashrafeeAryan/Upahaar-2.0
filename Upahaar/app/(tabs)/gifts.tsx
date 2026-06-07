@@ -6,11 +6,11 @@ import {
   Pressable,
   ScrollView,
 } from "react-native";
+import { router } from "expo-router";
 import AppButton from "@/src/components/ui/AppButton";
 
 /**
  * Upahaar theme constants.
- * These match the soft, light-pink, cutesy style used across the app.
  */
 const CARD_BORDER_COLOR = "#F8BBD0";
 const CARD_BORDER_WIDTH = 1;
@@ -20,11 +20,8 @@ const VERY_SOFT_PINK = "#FFF5F8";
 const PRIMARY_PINK = "#D81B60";
 
 /**
- * Temporary mock friend data.
- * Later, this should come from Appwrite.
- *
- * Each friend has saved memories/interests that the gift recommendation
- * logic can use to create thoughtful gift ideas.
+ * Temporary friend data.
+ * Later, this will come from Appwrite.
  */
 const friends = [
   {
@@ -33,9 +30,9 @@ const friends = [
     relationship: "Friend",
     budget: "$25 - $40",
     memories: [
-      "Mentioned wanting a black desk mat for his setup.",
-      "Likes coffee and minimal designs.",
-      "Prefers black and dark red colors.",
+      "Wants a black desk mat.",
+      "Likes coffee.",
+      "Likes minimal designs.",
     ],
   },
   {
@@ -44,9 +41,9 @@ const friends = [
     relationship: "Family",
     budget: "$30 - $60",
     memories: [
-      "Likes simple gold jewelry and soft colors.",
-      "Loves flowers and handwritten notes.",
-      "Prefers meaningful gifts over expensive ones.",
+      "Likes simple gold jewelry.",
+      "Loves flowers.",
+      "Likes handwritten notes.",
     ],
   },
   {
@@ -55,18 +52,16 @@ const friends = [
     relationship: "Friend",
     budget: "$20 - $35",
     memories: [
-      "Said he wants a better coffee mug.",
-      "Likes football and simple designs.",
+      "Wants a better coffee mug.",
+      "Likes football.",
       "Does not like flashy colors.",
     ],
   },
 ];
 
 /**
- * Mock gift recommendation data.
- *
- * For the MVP, recommendations are rule-based and connected to the selected
- * friend's saved memories. Later, this can become AI-assisted or Appwrite-backed.
+ * Temporary gift ideas.
+ * Later, Mimi can generate these from real saved memories.
  */
 const giftIdeasByFriendId: Record<
   number,
@@ -77,51 +72,52 @@ const giftIdeasByFriendId: Record<
     price: string;
     why: string;
     personalization: string;
+    giftNote: string;
     emoji: string;
   }[]
 > = {
   1: [
     {
       id: 1,
-      title: "Custom Desk Setup Mug",
+      title: "Custom Desk Mug",
       productType: "Mug",
       price: "$24",
       emoji: "☕",
-      why: "Alex mentioned wanting to improve his desk setup and likes coffee.",
-      personalization:
-        "Use a black mug with minimal white text like “Focus Mode”.",
+      why: "He likes coffee and clean desk setup items.",
+      personalization: "Black mug with small white text: “Focus Mode”.",
+      giftNote: "Happy birthday! Hope this makes your setup feel nicer.",
     },
     {
       id: 2,
-      title: "Minimal Black Desk Mat",
+      title: "Black Desk Mat",
       productType: "Desk accessory",
       price: "$35",
       emoji: "🖤",
-      why: "He specifically mentioned wanting a black desk mat for his setup.",
-      personalization:
-        "Add small initials or a clean dark red border to match his style.",
+      why: "He mentioned wanting a black desk mat.",
+      personalization: "Add small initials in the corner.",
+      giftNote: "For the desk setup upgrade you talked about.",
     },
     {
       id: 3,
-      title: "Dark Red Custom T-Shirt",
+      title: "Minimal T-Shirt",
       productType: "Shirt",
       price: "$29",
       emoji: "👕",
-      why: "He likes dark red and minimal designs, so this stays personal without being too loud.",
-      personalization:
-        "Add a small chest print with an inside joke or his initials.",
+      why: "He likes simple designs and darker colors.",
+      personalization: "Small chest design with initials or an inside joke.",
+      giftNote: "A little birthday gift with your style in mind.",
     },
   ],
   2: [
     {
       id: 1,
-      title: "Simple Gold-Style Locket",
+      title: "Gold-Style Locket",
       productType: "Locket",
       price: "$38",
       emoji: "✨",
-      why: "She likes simple gold jewelry and meaningful gifts.",
-      personalization:
-        "Add initials, a tiny heart, or a short message inside the locket.",
+      why: "She likes simple jewelry and meaningful gifts.",
+      personalization: "Add initials or a tiny heart.",
+      giftNote: "A little reminder of how loved you are.",
     },
     {
       id: 2,
@@ -129,19 +125,19 @@ const giftIdeasByFriendId: Record<
       productType: "Mug",
       price: "$22",
       emoji: "🌸",
-      why: "She loves flowers, soft colors, and thoughtful everyday gifts.",
-      personalization:
-        "Use a blush floral design with a short handwritten-style message.",
+      why: "She loves flowers and soft colors.",
+      personalization: "Blush floral design with a short message.",
+      giftNote: "For your cozy mornings. Happy birthday.",
     },
     {
       id: 3,
-      title: "Custom Note Card Bundle",
+      title: "Custom Note Cards",
       productType: "Card set",
       price: "$18",
       emoji: "💌",
-      why: "She prefers meaningful gifts over expensive ones, and handwritten notes fit that perfectly.",
-      personalization:
-        "Include a sweet birthday message and a few memories you want to thank her for.",
+      why: "She likes thoughtful handwritten notes.",
+      personalization: "Add a few sweet memories and thank-you notes.",
+      giftNote: "Something simple, meaningful, and full of love.",
     },
   ],
   3: [
@@ -151,29 +147,29 @@ const giftIdeasByFriendId: Record<
       productType: "Mug",
       price: "$21",
       emoji: "☕",
-      why: "Rahim said he wants a better coffee mug and likes simple designs.",
-      personalization:
-        "Use a clean design with his name or a small football icon.",
+      why: "He said he wants a better coffee mug.",
+      personalization: "Simple design with his name or a small icon.",
+      giftNote: "For better coffee days. Happy birthday!",
     },
     {
       id: 2,
-      title: "Football-Inspired T-Shirt",
+      title: "Football T-Shirt",
       productType: "Shirt",
       price: "$27",
       emoji: "⚽",
-      why: "He likes football, but does not like flashy colors, so a subtle design works best.",
-      personalization:
-        "Use a small minimal football graphic with neutral colors.",
+      why: "He likes football but prefers simple designs.",
+      personalization: "Small football graphic with neutral colors.",
+      giftNote: "A little something for your football side.",
     },
     {
       id: 3,
-      title: "Simple Everyday Hoodie",
+      title: "Everyday Hoodie",
       productType: "Hoodie",
       price: "$35",
       emoji: "🧥",
-      why: "He likes practical gifts and simple designs, so this feels useful and wearable.",
-      personalization:
-        "Add small initials on the sleeve instead of a large front design.",
+      why: "It is simple, useful, and easy to wear.",
+      personalization: "Small initials on the sleeve.",
+      giftNote: "Something cozy for your everyday fits.",
     },
   ],
 };
@@ -183,21 +179,17 @@ const Gifts = () => {
   const [selectedGiftId, setSelectedGiftId] = useState<number | null>(null);
   const [hasGenerated, setHasGenerated] = useState(false);
 
-  const selectedFriend = friends.find((friend) => friend.id === selectedFriendId);
-  const giftIdeas = giftIdeasByFriendId[selectedFriendId] ?? [];
+  const selectedFriend = friends.find(
+    (friend) => friend.id === selectedFriendId
+  );
 
-  /**
-   * For the MVP, this simply reveals the mock gift ideas.
-   *
-   * Later, this can call a real recommendation function that uses memories,
-   * likes, dislikes, relationship type, and budget.
-   */
+  const giftIdeas = giftIdeasByFriendId[selectedFriendId] ?? [];
+  const selectedGift = giftIdeas.find((gift) => gift.id === selectedGiftId);
+
   const handleGenerateGiftIdeas = () => {
     setHasGenerated(true);
     setSelectedGiftId(null);
   };
-
-  const selectedGift = giftIdeas.find((gift) => gift.id === selectedGiftId);
 
   return (
     <ImageBackground
@@ -205,31 +197,24 @@ const Gifts = () => {
       resizeMode="cover"
       className="flex-1"
     >
-      {/*
-        Soft pink overlay.
-        Keeps the background readable while preserving the light girly theme.
-      */}
       <View className="flex-1 bg-pink-50/70">
         <ScrollView
           contentContainerStyle={{ paddingBottom: 32 }}
           className="flex-1 px-6 pt-14"
           showsVerticalScrollIndicator={false}
         >
-          {/* Page header */}
+          {/* Header */}
           <View className="mb-6">
             <Text className="text-3xl font-bold text-textPrimary">
-              Gift Ideas ✨
+              Mimi’s Gift Helper ✨
             </Text>
 
             <Text className="text-base text-textSecondary mt-2 leading-5">
-              Turn saved memories into thoughtful custom gift suggestions.
+              Pick someone and get thoughtful gift ideas.
             </Text>
           </View>
 
-          {/*
-            Explanation card.
-            Helps users and judges understand how this page connects to Memory Drop.
-          */}
+          {/* Intro card */}
           <View
             className="rounded-3xl p-5 shadow-sm border mb-6"
             style={{
@@ -239,21 +224,18 @@ const Gifts = () => {
             }}
           >
             <Text className="text-lg font-bold text-textPrimary">
-              From little notes to meaningful gifts 💝
+              Let’s find something sweet 💝
             </Text>
 
             <Text className="text-sm text-textSecondary mt-2 leading-5">
-              Upahaar looks at the memories you saved and suggests gifts that
-              match what your friend likes, wants, or mentioned before.
+              Mimi uses what you remember about them to suggest gifts they may
+              love.
             </Text>
           </View>
 
-          {/*
-            Friend selector.
-            The selected friend controls which memories and recommendations appear.
-          */}
+          {/* Friend selector */}
           <Text className="text-sm font-semibold text-textPrimary mb-2">
-            Choose someone special
+            Choose someone
           </Text>
 
           <ScrollView
@@ -276,7 +258,9 @@ const Gifts = () => {
                     className="px-4 py-2 rounded-full border"
                     style={{
                       backgroundColor: isSelected ? SOFT_PINK : VERY_SOFT_PINK,
-                      borderColor: isSelected ? PRIMARY_PINK : CARD_BORDER_COLOR,
+                      borderColor: isSelected
+                        ? PRIMARY_PINK
+                        : CARD_BORDER_COLOR,
                       borderWidth: CARD_BORDER_WIDTH,
                     }}
                   >
@@ -294,10 +278,7 @@ const Gifts = () => {
             </View>
           </ScrollView>
 
-          {/*
-            Selected friend memory summary.
-            Shows the raw details that gift recommendations are based on.
-          */}
+          {/* Friend card */}
           {selectedFriend && (
             <View
               className="bg-white rounded-3xl p-5 shadow-sm border mb-6"
@@ -306,14 +287,14 @@ const Gifts = () => {
                 borderWidth: CARD_BORDER_WIDTH,
               }}
             >
-              <View className="flex-row items-center justify-between mb-3">
-                <View>
+              <View className="flex-row items-center justify-between mb-4">
+                <View className="flex-1">
                   <Text className="text-xl font-bold text-textPrimary">
                     {selectedFriend.name}
                   </Text>
 
                   <Text className="text-sm text-textSecondary mt-1">
-                    {selectedFriend.relationship} • Budget {selectedFriend.budget}
+                    {selectedFriend.relationship} • {selectedFriend.budget}
                   </Text>
                 </View>
 
@@ -326,7 +307,7 @@ const Gifts = () => {
               </View>
 
               <Text className="text-sm font-semibold text-textPrimary mb-2">
-                Saved memories
+                What Mimi knows
               </Text>
 
               <View className="gap-2">
@@ -344,22 +325,19 @@ const Gifts = () => {
               </View>
 
               <AppButton
-                title="Generate Gift Ideas"
+                title="Find Gift Ideas"
                 onPress={handleGenerateGiftIdeas}
                 className="mt-5"
               />
             </View>
           )}
 
-          {/*
-            Gift recommendation list.
-            Hidden until the user taps Generate Gift Ideas to make the flow feel intentional.
-          */}
+          {/* Gift ideas */}
           {hasGenerated && (
             <>
               <View className="flex-row items-center justify-between mb-3">
                 <Text className="text-lg font-semibold text-textPrimary">
-                  Recommended Gifts
+                  Gift Ideas
                 </Text>
 
                 <Text
@@ -388,7 +366,6 @@ const Gifts = () => {
                         borderWidth: isSelected ? 2 : CARD_BORDER_WIDTH,
                       }}
                     >
-                      {/* Gift title row */}
                       <View className="flex-row items-center justify-between">
                         <View className="flex-row items-center gap-3 flex-1">
                           <View
@@ -419,13 +396,12 @@ const Gifts = () => {
                         )}
                       </View>
 
-                      {/* Why this gift fits */}
                       <View
                         className="rounded-2xl px-4 py-3 mt-4"
                         style={{ backgroundColor: VERY_SOFT_PINK }}
                       >
                         <Text className="text-sm font-bold text-textPrimary">
-                          Why this fits
+                          Why it fits
                         </Text>
 
                         <Text className="text-sm text-textSecondary mt-1 leading-5">
@@ -433,13 +409,12 @@ const Gifts = () => {
                         </Text>
                       </View>
 
-                      {/* Personalization idea */}
                       <View className="mt-4">
                         <Text
                           className="text-sm font-bold"
                           style={{ color: PRIMARY_PINK }}
                         >
-                          Personalization idea
+                          Make it personal
                         </Text>
 
                         <Text className="text-sm text-textSecondary mt-1 leading-5">
@@ -453,10 +428,7 @@ const Gifts = () => {
             </>
           )}
 
-          {/*
-            Final selected gift preview.
-            This gives the user a clear ending point for the MVP demo.
-          */}
+          {/* Selected gift */}
           {selectedGift && selectedFriend && (
             <View
               className="rounded-3xl p-5 shadow-sm border mt-6"
@@ -467,19 +439,11 @@ const Gifts = () => {
               }}
             >
               <Text className="text-lg font-bold text-textPrimary">
-                Gift Preview 💌
+                Your Gift Pick 💌
               </Text>
 
               <Text className="text-sm text-textSecondary mt-2 leading-5">
-                You picked{" "}
-                <Text className="font-bold text-textPrimary">
-                  {selectedGift.title}
-                </Text>{" "}
-                for{" "}
-                <Text className="font-bold text-textPrimary">
-                  {selectedFriend.name}
-                </Text>
-                .
+                {selectedGift.title} for {selectedFriend.name}
               </Text>
 
               <View
@@ -490,7 +454,7 @@ const Gifts = () => {
                 }}
               >
                 <Text className="text-sm font-bold text-textPrimary">
-                  Ready-to-customize idea
+                  Custom idea
                 </Text>
 
                 <Text className="text-sm text-textSecondary mt-1 leading-5">
@@ -498,9 +462,25 @@ const Gifts = () => {
                 </Text>
               </View>
 
+              <View
+                className="bg-white rounded-2xl px-4 py-3 mt-3"
+                style={{
+                  borderColor: CARD_BORDER_COLOR,
+                  borderWidth: CARD_BORDER_WIDTH,
+                }}
+              >
+                <Text className="text-sm font-bold text-textPrimary">
+                  Gift note
+                </Text>
+
+                <Text className="text-sm text-textSecondary mt-1 leading-5">
+                  {selectedGift.giftNote}
+                </Text>
+              </View>
+
               <Pressable
                 onPress={() => {
-                  // Later: navigate to a real customization / Printful preview page.
+                  router.push("/gifts/preview");
                 }}
                 className="mt-5 bg-white rounded-2xl px-4 py-3 items-center border"
                 style={{
@@ -510,6 +490,37 @@ const Gifts = () => {
               >
                 <Text className="font-bold" style={{ color: PRIMARY_PINK }}>
                   Customize Gift →
+                </Text>
+              </Pressable>
+            </View>
+          )}
+
+          {/* Helpful next action */}
+          {hasGenerated && (
+            <View
+              className="bg-white rounded-3xl p-5 shadow-sm border mt-6"
+              style={{
+                borderColor: CARD_BORDER_COLOR,
+                borderWidth: CARD_BORDER_WIDTH,
+              }}
+            >
+              <Text className="text-lg font-bold text-textPrimary">
+                Want better ideas? 🌸
+              </Text>
+
+              <Text className="text-sm text-textSecondary mt-2 leading-5">
+                Add more memories so Mimi can make the suggestions more personal.
+              </Text>
+
+              <Pressable
+                onPress={() => {
+                  router.push("/(tabs)/memory");
+                }}
+                className="mt-4 rounded-2xl px-4 py-3 items-center"
+                style={{ backgroundColor: VERY_SOFT_PINK }}
+              >
+                <Text className="font-bold" style={{ color: PRIMARY_PINK }}>
+                  Add More Memories →
                 </Text>
               </Pressable>
             </View>

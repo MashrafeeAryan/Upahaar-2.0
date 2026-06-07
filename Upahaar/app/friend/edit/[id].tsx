@@ -1,9 +1,12 @@
+import { useState } from "react";
 import {
   View,
   Text,
   ImageBackground,
   Pressable,
   ScrollView,
+  TextInput,
+  Alert,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import AppButton from "@/src/components/ui/AppButton";
@@ -20,8 +23,20 @@ const VERY_SOFT_PINK = "#FFF5F8";
 const PRIMARY_PINK = "#D81B60";
 
 /**
+ * Relationship options.
+ * These keep the friend profile structured and useful for recommendations.
+ */
+const relationships = ["Friend", "Family", "Partner", "Classmate", "Coworker", "Other"];
+
+/**
+ * Budget options.
+ * These help the gift assistant recommend realistic gift ideas.
+ */
+const budgets = ["Under $20", "$20 - $35", "$35 - $60", "$60+", "Not sure"];
+
+/**
  * Temporary mock friend data.
- * Later, this should come from the Appwrite friends collection.
+ * Later, this should come from the Appwrite friends collection using the id.
  */
 const friends = [
   {
@@ -30,9 +45,9 @@ const friends = [
     birthDate: "1998-09-24",
     relationship: "Friend",
     budget: "$25 - $40",
-    likes: ["coffee", "desk setup", "minimal designs"],
-    dislikes: ["flashy colors", "messy designs"],
-    favoriteColors: ["black", "dark red"],
+    likes: "coffee, desk setup, minimal designs",
+    dislikes: "flashy colors, messy designs",
+    favoriteColors: "black, dark red",
     notes: "Likes practical gifts and clean designs.",
   },
   {
@@ -41,9 +56,9 @@ const friends = [
     birthDate: "1985-10-02",
     relationship: "Family",
     budget: "$30 - $60",
-    likes: ["gold jewelry", "flowers", "handwritten notes"],
-    dislikes: ["loud designs"],
-    favoriteColors: ["soft pink", "cream", "gold"],
+    likes: "gold jewelry, flowers, handwritten notes",
+    dislikes: "loud designs",
+    favoriteColors: "soft pink, cream, gold",
     notes: "Prefers meaningful gifts over expensive ones.",
   },
   {
@@ -52,89 +67,16 @@ const friends = [
     birthDate: "2000-03-25",
     relationship: "Friend",
     budget: "$20 - $35",
-    likes: ["coffee mugs", "football", "simple designs"],
-    dislikes: ["flashy colors"],
-    favoriteColors: ["blue", "black"],
+    likes: "coffee mugs, football, simple designs",
+    dislikes: "flashy colors",
+    favoriteColors: "blue, black",
     notes: "Likes useful everyday gifts.",
   },
 ];
 
-/**
- * Temporary mock memory data.
- * Later, this should come from the Appwrite memories collection using friendId.
- */
-const memories = [
-  {
-    id: 1,
-    friendId: 1,
-    category: "Wants ✨",
-    note: "Mentioned wanting a black desk mat for his setup.",
-  },
-  {
-    id: 2,
-    friendId: 1,
-    category: "Likes 💕",
-    note: "Likes coffee and minimal designs.",
-  },
-  {
-    id: 3,
-    friendId: 2,
-    category: "Likes 💕",
-    note: "Likes simple gold jewelry and soft colors.",
-  },
-  {
-    id: 4,
-    friendId: 2,
-    category: "Gift clue 🎁",
-    note: "Would love something with flowers and a handwritten note.",
-  },
-  {
-    id: 5,
-    friendId: 3,
-    category: "Wants ✨",
-    note: "Said he wants a better coffee mug.",
-  },
-];
-
-/**
- * Formats a full date string into a short birthday display format.
- *
- * Example:
- * "1998-09-24" -> "Sep 24"
- */
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-};
-
-/**
- * Calculates how many days are left until the next birthday.
- */
-const getDaysUntilBirthday = (dateString: string) => {
-  const today = new Date();
-  const birthDate = new Date(dateString);
-
-  const nextBirthday = new Date(
-    today.getFullYear(),
-    birthDate.getMonth(),
-    birthDate.getDate()
-  );
-
-  if (nextBirthday < today) {
-    nextBirthday.setFullYear(today.getFullYear() + 1);
-  }
-
-  const diffInMs = nextBirthday.getTime() - today.getTime();
-  return Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
-};
-
-const FriendProfile = () => {
+const EditFriend = () => {
   /**
-   * Expo Router gives us the dynamic route value from /friend/[id].
+   * Expo Router gives us the dynamic route value from /friend/edit/[id].
    */
   const { id } = useLocalSearchParams();
 
@@ -142,15 +84,22 @@ const FriendProfile = () => {
   const friend = friends.find((item) => item.id === friendId);
 
   /**
-   * Only show memories that belong to this friend.
+   * If this was connected to Appwrite, these states would be filled
+   * after fetching the friend document from the database.
    */
-  const friendMemories = memories.filter(
-    (memory) => memory.friendId === friendId
+  const [name, setName] = useState(friend?.name ?? "");
+  const [birthDate, setBirthDate] = useState(friend?.birthDate ?? "");
+  const [selectedRelationship, setSelectedRelationship] = useState(
+    friend?.relationship ?? "Friend"
   );
+  const [selectedBudget, setSelectedBudget] = useState(friend?.budget ?? "$20 - $35");
+  const [likes, setLikes] = useState(friend?.likes ?? "");
+  const [dislikes, setDislikes] = useState(friend?.dislikes ?? "");
+  const [favoriteColors, setFavoriteColors] = useState(friend?.favoriteColors ?? "");
+  const [notes, setNotes] = useState(friend?.notes ?? "");
 
   /**
-   * Simple fallback if the friend does not exist.
-   * Later, this can become a nicer error state.
+   * Simple fallback if the friend id does not match any mock data.
    */
   if (!friend) {
     return (
@@ -174,9 +123,92 @@ const FriendProfile = () => {
     );
   }
 
+  /**
+   * Updates the friend profile.
+   *
+   * Right now, this only validates the form and routes back to the profile page.
+   * Later, replace this with Appwrite updateDocument().
+   */
+  const handleUpdateFriend = () => {
+    if (!name.trim()) {
+      Alert.alert("Name required", "Please enter your friend's name.");
+      return;
+    }
+
+    if (!birthDate.trim()) {
+      Alert.alert("Birthday required", "Please enter their birthday.");
+      return;
+    }
+
+    /**
+     * Later Appwrite update shape:
+     *
+     * await databases.updateDocument(
+     *   DATABASE_ID,
+     *   FRIENDS_COLLECTION_ID,
+     *   friendDocumentId,
+     *   {
+     *     name: name.trim(),
+     *     birthDate: birthDate.trim(),
+     *     relationship: selectedRelationship,
+     *     budget: selectedBudget,
+     *     likes: likes.trim(),
+     *     dislikes: dislikes.trim(),
+     *     favoriteColors: favoriteColors.trim(),
+     *     notes: notes.trim(),
+     *     updatedAt: new Date().toISOString()
+     *   }
+     * );
+     */
+
+    Alert.alert("Friend updated 💝", `${name.trim()}'s profile was updated.`, [
+      {
+        text: "OK",
+        onPress: () => {
+          router.replace(`/friend/${friend.id}`);
+        },
+      },
+    ]);
+  };
+
+  /**
+   * Deletes the friend profile.
+   *
+   * Later, this should delete the friend document from Appwrite and optionally
+   * delete memories connected to this friend.
+   */
+  const handleDeleteFriend = () => {
+    Alert.alert(
+      "Delete friend?",
+      `This will remove ${friend.name}'s profile from Upahaar.`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            /**
+             * Later:
+             * await databases.deleteDocument(
+             *   DATABASE_ID,
+             *   FRIENDS_COLLECTION_ID,
+             *   friendDocumentId
+             * );
+             */
+
+            router.replace("/(tabs)/friends");
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <ImageBackground
-      source={require("../../assets/images/appBackground2_new.png")}
+      source={require("../../../assets/images/appBackground2_new.png")}
       resizeMode="cover"
       className="flex-1"
     >
@@ -190,11 +222,11 @@ const FriendProfile = () => {
           <View className="flex-row items-center justify-between mb-6">
             <View className="flex-1">
               <Text className="text-3xl font-bold text-textPrimary">
-                {friend.name} 💝
+                Edit Friend 🎀
               </Text>
 
               <Text className="text-base text-textSecondary mt-2 leading-5">
-                Their birthday, saved memories, and gift clues in one place.
+                Update their birthday, preferences, and gift clues.
               </Text>
             </View>
 
@@ -215,80 +247,7 @@ const FriendProfile = () => {
             </Pressable>
           </View>
 
-          {/* Main profile card */}
-          <View
-            className="bg-white rounded-3xl p-5 shadow-sm border mb-6"
-            style={{
-              borderColor: CARD_BORDER_COLOR,
-              borderWidth: CARD_BORDER_WIDTH,
-            }}
-          >
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-4 flex-1">
-                <View
-                  className="h-16 w-16 rounded-3xl items-center justify-center"
-                  style={{ backgroundColor: SOFT_PINK }}
-                >
-                  <Text className="text-2xl">🎀</Text>
-                </View>
-
-                <View className="flex-1">
-                  <Text className="text-xl font-bold text-textPrimary">
-                    {friend.name}
-                  </Text>
-
-                  <Text className="text-sm text-textSecondary mt-1">
-                    {friend.relationship}
-                  </Text>
-                </View>
-              </View>
-
-              <Pressable
-                onPress={() => {
-                  router.push(`/friend/edit/${friend.id}`);
-                }}
-                className="px-4 py-2 rounded-full border"
-                style={{
-                  backgroundColor: VERY_SOFT_PINK,
-                  borderColor: CARD_BORDER_COLOR,
-                  borderWidth: CARD_BORDER_WIDTH,
-                }}
-              >
-                <Text className="font-bold" style={{ color: PRIMARY_PINK }}>
-                  Edit
-                </Text>
-              </Pressable>
-            </View>
-
-            <View
-              className="rounded-2xl px-4 py-3 mt-5"
-              style={{ backgroundColor: VERY_SOFT_PINK }}
-            >
-              <Text className="text-sm font-bold text-textPrimary">
-                Birthday 🎂
-              </Text>
-
-              <Text className="text-sm text-textSecondary mt-1">
-                {formatDate(friend.birthDate)} •{" "}
-                {getDaysUntilBirthday(friend.birthDate)} days left
-              </Text>
-            </View>
-
-            <View
-              className="rounded-2xl px-4 py-3 mt-3"
-              style={{ backgroundColor: VERY_SOFT_PINK }}
-            >
-              <Text className="text-sm font-bold text-textPrimary">
-                Gift budget
-              </Text>
-
-              <Text className="text-sm text-textSecondary mt-1">
-                {friend.budget}
-              </Text>
-            </View>
-          </View>
-
-          {/* Gift assistant actions */}
+          {/* Info card */}
           <View
             className="rounded-3xl p-5 shadow-sm border mb-6"
             style={{
@@ -298,198 +257,264 @@ const FriendProfile = () => {
             }}
           >
             <Text className="text-lg font-bold text-textPrimary">
-              Mimi can help ✨
+              Keep their profile fresh 💌
             </Text>
 
             <Text className="text-sm text-textSecondary mt-2 leading-5">
-              Use saved memories to generate thoughtful gift ideas for{" "}
-              {friend.name}.
+              Updated details help Mimi suggest better, more thoughtful gifts.
+            </Text>
+          </View>
+
+          {/* Edit form */}
+          <View
+            className="bg-white rounded-3xl p-5 shadow-sm border"
+            style={{
+              borderColor: CARD_BORDER_COLOR,
+              borderWidth: CARD_BORDER_WIDTH,
+            }}
+          >
+            <Text className="text-lg font-bold text-textPrimary mb-4">
+              Profile details
             </Text>
 
-            <View className="flex-row gap-3 mt-5">
-              <Pressable
-                onPress={() => {
-                  router.push("/(tabs)/memory");
-                }}
-                className="flex-1 bg-white rounded-2xl px-4 py-3 items-center border"
-                style={{
-                  borderColor: CARD_BORDER_COLOR,
-                  borderWidth: CARD_BORDER_WIDTH,
-                }}
-              >
-                <Text className="font-bold" style={{ color: PRIMARY_PINK }}>
-                  Add Memory
-                </Text>
-              </Pressable>
+            {/* Name */}
+            <Text className="text-sm font-semibold text-textPrimary mb-2">
+              Name
+            </Text>
 
-              <Pressable
-                onPress={() => {
-                  router.push("/(tabs)/gifts");
-                }}
-                className="flex-1 bg-white rounded-2xl px-4 py-3 items-center border"
-                style={{
-                  borderColor: CARD_BORDER_COLOR,
-                  borderWidth: CARD_BORDER_WIDTH,
-                }}
-              >
-                <Text className="font-bold" style={{ color: PRIMARY_PINK }}>
-                  Gift Ideas
-                </Text>
-              </Pressable>
-            </View>
-          </View>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder="Example: Aisha"
+              placeholderTextColor="#B48A99"
+              className="rounded-2xl px-4 py-4 text-base text-textPrimary border mb-5"
+              style={{
+                backgroundColor: VERY_SOFT_PINK,
+                borderColor: CARD_BORDER_COLOR,
+                borderWidth: CARD_BORDER_WIDTH,
+              }}
+            />
 
-          {/* Likes */}
-          <Text className="text-lg font-semibold text-textPrimary mb-3">
-            Likes 💕
-          </Text>
+            {/* Birthday */}
+            <Text className="text-sm font-semibold text-textPrimary mb-2">
+              Birthday
+            </Text>
 
-          <View className="flex-row flex-wrap gap-2 mb-6">
-            {friend.likes.map((like) => (
-              <View
-                key={like}
-                className="px-4 py-2 rounded-full border"
-                style={{
-                  backgroundColor: SOFT_PINK,
-                  borderColor: CARD_BORDER_COLOR,
-                  borderWidth: CARD_BORDER_WIDTH,
-                }}
-              >
-                <Text className="text-sm font-semibold" style={{ color: PRIMARY_PINK }}>
-                  {like}
-                </Text>
+            <TextInput
+              value={birthDate}
+              onChangeText={setBirthDate}
+              placeholder="YYYY-MM-DD, example: 2000-09-24"
+              placeholderTextColor="#B48A99"
+              className="rounded-2xl px-4 py-4 text-base text-textPrimary border mb-5"
+              style={{
+                backgroundColor: VERY_SOFT_PINK,
+                borderColor: CARD_BORDER_COLOR,
+                borderWidth: CARD_BORDER_WIDTH,
+              }}
+            />
+
+            {/* Relationship selector */}
+            <Text className="text-sm font-semibold text-textPrimary mb-2">
+              Relationship
+            </Text>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="mb-5"
+            >
+              <View className="flex-row gap-2">
+                {relationships.map((relationship) => {
+                  const isSelected = selectedRelationship === relationship;
+
+                  return (
+                    <Pressable
+                      key={relationship}
+                      onPress={() => {
+                        setSelectedRelationship(relationship);
+                      }}
+                      className="px-4 py-2 rounded-full border"
+                      style={{
+                        backgroundColor: isSelected ? SOFT_PINK : VERY_SOFT_PINK,
+                        borderColor: isSelected ? PRIMARY_PINK : CARD_BORDER_COLOR,
+                        borderWidth: CARD_BORDER_WIDTH,
+                      }}
+                    >
+                      <Text
+                        className="text-sm font-semibold"
+                        style={{
+                          color: isSelected ? PRIMARY_PINK : "#7A5A66",
+                        }}
+                      >
+                        {relationship}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
-            ))}
-          </View>
+            </ScrollView>
 
-          {/* Dislikes */}
-          <Text className="text-lg font-semibold text-textPrimary mb-3">
-            Dislikes
-          </Text>
+            {/* Budget selector */}
+            <Text className="text-sm font-semibold text-textPrimary mb-2">
+              Gift budget
+            </Text>
 
-          <View className="flex-row flex-wrap gap-2 mb-6">
-            {friend.dislikes.map((dislike) => (
-              <View
-                key={dislike}
-                className="px-4 py-2 rounded-full border bg-white"
-                style={{
-                  borderColor: CARD_BORDER_COLOR,
-                  borderWidth: CARD_BORDER_WIDTH,
-                }}
-              >
-                <Text className="text-sm font-semibold text-textSecondary">
-                  {dislike}
-                </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              className="mb-5"
+            >
+              <View className="flex-row gap-2">
+                {budgets.map((budget) => {
+                  const isSelected = selectedBudget === budget;
+
+                  return (
+                    <Pressable
+                      key={budget}
+                      onPress={() => {
+                        setSelectedBudget(budget);
+                      }}
+                      className="px-4 py-2 rounded-full border"
+                      style={{
+                        backgroundColor: isSelected ? SOFT_PINK : VERY_SOFT_PINK,
+                        borderColor: isSelected ? PRIMARY_PINK : CARD_BORDER_COLOR,
+                        borderWidth: CARD_BORDER_WIDTH,
+                      }}
+                    >
+                      <Text
+                        className="text-sm font-semibold"
+                        style={{
+                          color: isSelected ? PRIMARY_PINK : "#7A5A66",
+                        }}
+                      >
+                        {budget}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
-            ))}
+            </ScrollView>
+
+            {/* Likes */}
+            <Text className="text-sm font-semibold text-textPrimary mb-2">
+              Likes
+            </Text>
+
+            <TextInput
+              value={likes}
+              onChangeText={setLikes}
+              placeholder="Example: matcha, cats, silver jewelry"
+              placeholderTextColor="#B48A99"
+              className="rounded-2xl px-4 py-4 text-base text-textPrimary border mb-5"
+              style={{
+                backgroundColor: VERY_SOFT_PINK,
+                borderColor: CARD_BORDER_COLOR,
+                borderWidth: CARD_BORDER_WIDTH,
+              }}
+            />
+
+            {/* Dislikes */}
+            <Text className="text-sm font-semibold text-textPrimary mb-2">
+              Dislikes
+            </Text>
+
+            <TextInput
+              value={dislikes}
+              onChangeText={setDislikes}
+              placeholder="Example: loud colors, cheesy quotes"
+              placeholderTextColor="#B48A99"
+              className="rounded-2xl px-4 py-4 text-base text-textPrimary border mb-5"
+              style={{
+                backgroundColor: VERY_SOFT_PINK,
+                borderColor: CARD_BORDER_COLOR,
+                borderWidth: CARD_BORDER_WIDTH,
+              }}
+            />
+
+            {/* Favorite colors */}
+            <Text className="text-sm font-semibold text-textPrimary mb-2">
+              Favorite colors
+            </Text>
+
+            <TextInput
+              value={favoriteColors}
+              onChangeText={setFavoriteColors}
+              placeholder="Example: blush pink, dark green, gold"
+              placeholderTextColor="#B48A99"
+              className="rounded-2xl px-4 py-4 text-base text-textPrimary border mb-5"
+              style={{
+                backgroundColor: VERY_SOFT_PINK,
+                borderColor: CARD_BORDER_COLOR,
+                borderWidth: CARD_BORDER_WIDTH,
+              }}
+            />
+
+            {/* Notes */}
+            <Text className="text-sm font-semibold text-textPrimary mb-2">
+              Extra notes
+            </Text>
+
+            <TextInput
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="Example: She likes simple gifts and handwritten notes..."
+              placeholderTextColor="#B48A99"
+              multiline
+              textAlignVertical="top"
+              className="min-h-28 rounded-2xl px-4 py-4 text-base text-textPrimary border"
+              style={{
+                backgroundColor: VERY_SOFT_PINK,
+                borderColor: CARD_BORDER_COLOR,
+                borderWidth: CARD_BORDER_WIDTH,
+              }}
+            />
+
+            <Text className="text-xs text-textSecondary mt-2 leading-4">
+              Tip: Save clear details so Mimi can make better recommendations.
+            </Text>
+
+            <AppButton
+              title="Save Changes"
+              onPress={handleUpdateFriend}
+              className="mt-5"
+            />
           </View>
 
-          {/* Favorite colors */}
-          <Text className="text-lg font-semibold text-textPrimary mb-3">
-            Favorite Colors 🎨
-          </Text>
-
-          <View className="flex-row flex-wrap gap-2 mb-6">
-            {friend.favoriteColors.map((color) => (
-              <View
-                key={color}
-                className="px-4 py-2 rounded-full border"
-                style={{
-                  backgroundColor: VERY_SOFT_PINK,
-                  borderColor: CARD_BORDER_COLOR,
-                  borderWidth: CARD_BORDER_WIDTH,
-                }}
-              >
-                <Text className="text-sm font-semibold" style={{ color: PRIMARY_PINK }}>
-                  {color}
-                </Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Notes */}
+          {/* Danger zone */}
           <View
-            className="bg-white rounded-3xl p-5 shadow-sm border mb-6"
+            className="bg-white rounded-3xl p-5 shadow-sm border mt-6"
             style={{
               borderColor: CARD_BORDER_COLOR,
               borderWidth: CARD_BORDER_WIDTH,
             }}
           >
             <Text className="text-lg font-bold text-textPrimary">
-              Extra Notes 💌
+              Danger Zone
             </Text>
 
             <Text className="text-sm text-textSecondary mt-2 leading-5">
-              {friend.notes}
-            </Text>
-          </View>
-
-          {/* Saved memories */}
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-lg font-semibold text-textPrimary">
-              Saved Memories 💭
+              Delete this friend profile if you no longer want to keep their
+              birthday and memory notes.
             </Text>
 
-            <Text className="text-sm font-semibold" style={{ color: PRIMARY_PINK }}>
-              {friendMemories.length} notes
-            </Text>
+            <Pressable
+              onPress={handleDeleteFriend}
+              className="mt-4 rounded-2xl px-4 py-3 items-center border"
+              style={{
+                backgroundColor: "#FFF0F3",
+                borderColor: "#F4A6B8",
+                borderWidth: CARD_BORDER_WIDTH,
+              }}
+            >
+              <Text className="font-bold" style={{ color: "#C2185B" }}>
+                Delete Friend
+              </Text>
+            </Pressable>
           </View>
-
-          <View
-            className="bg-white rounded-3xl shadow-sm overflow-hidden border"
-            style={{
-              borderColor: CARD_BORDER_COLOR,
-              borderWidth: CARD_BORDER_WIDTH,
-            }}
-          >
-            {friendMemories.length > 0 ? (
-              friendMemories.map((memory, index) => (
-                <View
-                  key={memory.id}
-                  className={`px-5 py-4 ${
-                    index !== friendMemories.length - 1 ? "border-b" : ""
-                  }`}
-                  style={{
-                    borderBottomColor:
-                      index !== friendMemories.length - 1
-                        ? CARD_BORDER_COLOR
-                        : "transparent",
-                  }}
-                >
-                  <Text className="text-xs font-bold" style={{ color: PRIMARY_PINK }}>
-                    {memory.category}
-                  </Text>
-
-                  <Text className="text-sm text-textSecondary mt-1 leading-5">
-                    {memory.note}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <View className="px-5 py-6">
-                <Text className="text-base font-bold text-textPrimary">
-                  No memories yet
-                </Text>
-
-                <Text className="text-sm text-textSecondary mt-1 leading-5">
-                  Add a small detail so Mimi can suggest better gifts later.
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {/* Bottom CTA */}
-          <AppButton
-            title="Generate Gift Ideas"
-            onPress={() => {
-              router.push("/(tabs)/gifts");
-            }}
-            className="mt-6"
-          />
         </ScrollView>
       </View>
     </ImageBackground>
   );
 };
 
-export default FriendProfile;
+export default EditFriend;
